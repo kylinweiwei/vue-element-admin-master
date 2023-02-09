@@ -27,16 +27,30 @@ module.exports = {
   publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'static',
-  lintOnSave: process.env.NODE_ENV === 'development',
+  // 关闭ESLint检查第一步
+  // lintOnSave: process.env.NODE_ENV === 'development',
+  lintOnSave: false,
+
   productionSourceMap: false,
   devServer: {
+    disableHostCheck: true,
     port: port,
     open: true,
     overlay: {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    // before: require('./mock/mock-server.js')
+    //代理配置
+    proxy: {
+      [process.env.VUE_APP_BASE_API]: {
+        target: "http://localhost:88/api",
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

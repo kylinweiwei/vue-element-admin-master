@@ -1,24 +1,32 @@
-import request from '@/utils/request'
+import http from '@/utils/request'
 
-export function login(data) {
-  return request({
-    url: '/vue-element-admin/user/login',
-    method: 'post',
-    data
-  })
+/*
+* 用户登录方式
+* @param data
+* @return
+* */
+export async function login(data) {
+  return await http.login("/api/user/login", data);
+}
+/*
+* 获取登陆用户信息
+* @param data
+* @return
+* */
+export async function getInfo() {
+  return await http.get("/api/sysUser/getInfo");
 }
 
-export function getInfo(token) {
-  return request({
-    url: '/vue-element-admin/user/info',
-    method: 'get',
-    params: { token }
-  })
+/*
+* 退出登录
+* @return
+* */
+export async function logout(params) {
+  return await http.post("/api/sysUser/logout", params)
 }
-
-export function logout() {
-  return request({
-    url: '/vue-element-admin/user/logout',
-    method: 'post'
-  })
+/**
+ * 获取用户菜单数据
+ */
+export async function getMenuList(){
+  return await http.get("/api/sysUser/getMenuList");
 }

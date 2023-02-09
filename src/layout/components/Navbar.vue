@@ -25,19 +25,19 @@
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/profile/index">
-            <el-dropdown-item>Profile</el-dropdown-item>
+            <el-dropdown-item>个人中心</el-dropdown-item>
           </router-link>
           <router-link to="/">
-            <el-dropdown-item>Dashboard</el-dropdown-item>
+            <el-dropdown-item>首页</el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
+<!--          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">-->
+<!--            <el-dropdown-item>Github</el-dropdown-item>-->
+<!--          </a>-->
+<!--          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">-->
+<!--            <el-dropdown-item>Docs</el-dropdown-item>-->
+<!--          </a>-->
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">退出系统</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -53,6 +53,10 @@ import ErrorLog from '@/components/ErrorLog'
 import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
+//导入退出用的脚本
+import { logout } from "@/api/user";
+//导入auth.js脚本
+import { getToken, removeToken, clearStorage } from "@/utils/auth";
 
 export default {
   components: {
@@ -74,9 +78,53 @@ export default {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
+    /*
+    * 用户退出登录的按钮
+    * */
     async logout() {
-      await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      //确认提示
+      let confirm = await this.$myconfirm("确认退出系统");
+      //是否确认
+      if (confirm) {
+        //封装请求参数
+        let params = {token:getToken()};
+        //发送退出请求
+        let res = await logout(params);
+        //判断是否成功
+        if(res.success){
+          //清空token
+          removeToken();
+          clearStorage();
+          //跳转到登录页面
+          window.location.href="/login";
+        }
+      }
+
+      // this.$confirm("确定退出系统吗?", "提示", {
+      //   confirmButtonText: "确定",
+      //   cancelButtonText: "取消",
+      //   type: "warning",
+      // }).then(async() => {
+      //   //封装请求参数
+      //   let params = {token:getToken()};
+      //   //发送退出请求
+      //   let res = await logout(params);
+      //   //判断是否成功
+      //   if(res.success){
+      //     //清空token
+      //     removeToken();
+      //     clearStorage();
+      //     //跳转到登录页面
+      //     window.location.href="/login";
+      //   }
+      // }).catch(() => {
+      //   this.$message({
+      //     type: "info",
+      //     message: "已取消操作"
+      //   });
+      // });
+      // await this.$store.dispatch('user/logout')
+      // this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     }
   }
 }

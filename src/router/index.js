@@ -37,6 +37,7 @@ import nestedRouter from './modules/nested'
  * constantRoutes
  * a base page that does not have permission requirements
  * all roles can be accessed
+ * 所有角色都能访问该路由下的信息
  */
 export const constantRoutes = [
   {
@@ -79,46 +80,7 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
-      }
-    ]
-  },
-  {
-    path: '/documentation',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: 'Documentation', icon: 'documentation', affix: true }
-      }
-    ]
-  },
-  {
-    path: '/guide',
-    component: Layout,
-    redirect: '/guide/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/guide/index'),
-        name: 'Guide',
-        meta: { title: 'Guide', icon: 'guide', noCache: true }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    component: Layout,
-    redirect: '/profile/index',
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/profile/index'),
-        name: 'Profile',
-        meta: { title: 'Profile', icon: 'user', noCache: true }
+        meta: { title: '首页', icon: 'dashboard', affix: true }
       }
     ]
   }
@@ -127,6 +89,7 @@ export const constantRoutes = [
 /**
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
+ * 该路由信息由用户角色进行控制显示(该路由是查询当前登录用户拥有的那些菜单信息)
  */
 export const asyncRoutes = [
   {
