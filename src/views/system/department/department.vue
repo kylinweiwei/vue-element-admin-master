@@ -124,16 +124,16 @@ import departmentApi from '@/api/department';
 //导入对话框组件
 import SystemDialog from '@/components/system/SystemDialog.vue';
 
- export default {
+export default {
   name: 'department',
-   //注册组件
-   components:{
+  //注册组件
+  components: {
     SystemDialog
-   },
+  },
   data() {
     return {
       searchModel: {
-        departmentName:"", //部门名称
+        departmentName: "", //部门名称
       },
       tableData:[], //表格数据
       deptDialog:{
@@ -196,21 +196,48 @@ import SystemDialog from '@/components/system/SystemDialog.vue';
     /*
       * 窗口的关闭事件
       * */
-    onClose(){
-      this.deptDialog.visible=false;
+    onClose() {
+      this.deptDialog.visible = false;
     },
     /*
       * 窗口确认事件
       * */
-    onConfirm(){
-
+    onConfirm() {
+      //进行表单验证
+      this.$refs.deptForm.validate(async (valid) => {
+        //如果验证通过
+        if (valid) {
+          let res = null;
+          //判断当前数据是新增还是修改，根据当前dept的id树形是否为空
+          //如果为空发送新增请求否则发送修改请求
+          if (this.dept.id === "") {
+            //发送添加请求
+            res = await departmentApi.addDept(this.dept);
+          } else {
+            //发送修改请求
+            res = await departmentApi.updateDept(this.dept);
+          }
+          //判断是否成功
+          if (res.success) {
+            //提示成功
+            this.$message.success(res.message);
+            //刷新数据
+            this.search();
+            //关闭窗口
+            this.deptDialog.visible = false;
+          } else {
+            //提示失败
+            this.$message.error(res.message);
+          }
+        }
+      });
     },
     /*
     * 打开选择所属部门的窗口
     * */
-    async openSelectDeptWindow(){
+    async openSelectDeptWindow() {
       //显示属性
-      this.parentDialog.visible=true;
+      this.parentDialog.visible = true;
       //查询所属部门列表
       let res = await departmentApi.getParentTreeList();
       //判断是否成功
@@ -231,22 +258,60 @@ import SystemDialog from '@/components/system/SystemDialog.vue';
     * */
     handleNodeClick(data){
       //将选中的部门复制给dept对象
-      this.dept.id = data.id;
+      this.dept.pid = data.id;
       this.dept.parentName = data.departmentName;
     },
     /*
     * 选择所属部门的关闭事件
     * */
-    onParentClose(){
+    onParentClose() {
       this.parentDialog.visible = false;
     },
     /*
    * 选择所属部门的确认事件
    * */
-    onParentConfirm(){
+    onParentConfirm() {
       this.parentDialog.visible = false;
+    },
+    /*
+    * 编辑部门
+    * */
+    handleEdit(row) {
+      //数据回显
+      this.$objCopy(row, this.dept);
+      //设置窗口标题
+      this.deptDialog.title = "编辑部门";
+      //显示窗口
+      this.deptDialog.visible = true;
+    },
+    /*
+    * 删除部门
+    * */
+    async handleDelete(row) {
+      //查询部门下是否存在子部门或用户
+      let result = await departmentApi.checkDepartment({id: row.id});
+      //判断是否可以删除
+      if (!result.success) {
+        //提示不能删除
+        this.$message.warning(result.message);
+      } else {
+        //确认是否删除
+        let confirm = await this.$myconfirm("确认要删除该数据吗？");
+        if (confirm) {
+          //发送请求删除
+          let res = await departmentApi.deleteById({id: row.id});
+          //判断是否成功
+          if (res.success) {
+            this.$message.success(res.message);
+            //刷新
+            this.search();
+          } else {
+            this.$message.error(res.message);
+          }
+        }
+      }
     }
-  }
+  },
 }
 </script>
 <style lang="scss" scoped>
