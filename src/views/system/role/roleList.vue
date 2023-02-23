@@ -132,8 +132,10 @@
 
 <script>
 //导入role.js中的方法
-import {getRoles, addRole, updateRole, checkRole, deleteRole} from '@/api/role'
+import {getRoles, addRole, updateRole, checkRole, deleteRole, getAssignTree, assignSave} from '@/api/role'
 import SystemDialog from "@/components/system/SystemDialog";
+//导入末级节点脚本
+import leafUtils from '@/utils/leaf'
 
 export default {
   name: "roleList",
@@ -333,12 +335,72 @@ export default {
     /*
     * 分配权限
     * */
-    assignRole(row) {
-      alert(row.roleName);
+    async assignRole(row) {
+      //将roleId赋值
+      this.roleId = row.id;
+      //构建查询参数
+      let params = {
+        roleId : row.id,//角色ID
+        userId : this.$store.getters.userId // 用户Id
+      }
+      //发送查询分配权限惨淡请求
+      let res = await getAssignTree(params);
+      //判断是否成功
+      if (res.success){
+        //获取到当前登录用户所拥有的菜单权限
+        let {permissionList} = res.data;
+        //获取当前被分配角色的已经拥有的菜单权限
+        let {checkList} = res.data;
+        //判断当前菜单是否是最后一级
+        let {setLeaf} = leafUtils();
+        //设置权限菜单的列表
+        let newPermissionList = setLeaf(permissionList);
+        //设置树节点菜单数据
+        this.assignTreeData = newPermissionList;
+        //将回调延迟到下一次DOM跟新循环之后执行，在修改数据之后立即调用该放大，然后的等待DOM更新
+        this.$nextTick(()=>{
+          //获取菜单节点数据
+          let nodes = this.$refs.assignTree.children;
+          //设置子节点
+          this.setChild(nodes, checkList);
+        })
+      }
+
       //设置窗口标题``反写符号
       this.assignDialog.title = `给【${row.roleName}】分配权限`;
       //显示窗口
       this.assignDialog.visible = true;
+    },
+    /*
+    *设置子节点
+    * */
+    setChild(childNodes, checkList){
+      //判断是否存在子节点
+      if (childNodes && childNodes.length>0){
+        //循环所有权限
+        for (let i = 0; i < childNodes.length; i++){
+          //根据data或key获取书组件中的node节点
+          let node = this.$refs.assignTree.getNode(childNodes[i]);
+          //判断使用已经拥有对应的角色权限数据
+          if (checkList && checkList.length > 0){
+            //循环遍历已有的权限集合
+            for (let j = 0; j < checkList.length; j++) {
+              //判断去那先ID是否相等
+              if (childNodes[i].id === checkList[j]){
+                //判断节点的状态，如果当前节点是展开的，则将树节点选中
+                if (childNodes[i].open){
+                  this.$refs.assignTree.setChecked(node, true);
+                  break;
+                }
+              }
+            }
+          }
+          //判断如果存在子节点，则递归选中
+          if (childNodes[i].children){
+            this.setChild(childNodes[i].children, checkList);
+          }
+        }
+      }
     },
     /**
      * 分配权限窗口取消事件
@@ -350,7 +412,29 @@ export default {
      * 分配权限窗口确认事件
      */
     async onAssignConfirm() {
-
+      //获取选中的树节点的Lkey
+      let ids = this.$refs.assignTree.getCheckedKeys();
+      //获取选中的父节点ID
+      let pids = this.$refs.assignTree.getHalfCheckedKeys();
+      //组装选中节点的ID数据
+      let listId = ids.concat(pids);
+      //组装参数
+      let params = {
+        roleId:this.roleId,//当前要分配的角色ID
+        list:listId, //选中的节点ID列表
+      }
+      //发送请求
+      let res = await assignSave(params);
+      //判断是否成功
+      if (res.success){
+        //关闭窗口
+        this.assignDialog.visible = false;
+        //提示成功
+        this.$message.success(res.message);
+      }else {
+        //提示失败
+        this.$message.error(res.message);
+      }
     }
   }
 }

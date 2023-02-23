@@ -30,3 +30,29 @@ export async function logout(params) {
 export async function getMenuList(){
   return await http.get("/api/sysUser/getMenuList");
 }
+export default {
+  /**
+   * 查询用户列表
+   * @param params
+   * @returns
+   */
+  async getUserList(params){
+    return await http.get("/api/user/list",params);
+  },
+  /**
+   * 添加用户
+   * @param params
+   * @returns
+   */
+  async addUser(params){
+    return await http.post("/api/user/add",params);
+  },
+  /*
+  * 修改用户
+  * @param params
+  *@returns
+  * */
+  async updateUser(params){
+    return await http.put("/api/user/update", params);
+  }
+}
