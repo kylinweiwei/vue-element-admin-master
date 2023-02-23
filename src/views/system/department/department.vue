@@ -7,7 +7,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="search()">查询</el-button>
-        <el-button icon="el-icon-refresh-right">重置</el-button>
+        <el-button icon="el-icon-refresh-right" @click="resetValue()">重置</el-button>
         <el-button type="success" icon="el-icon-plus" @click="openAddWindow()">新增</el-button>
       </el-form-item>
     </el-form>
@@ -186,6 +186,15 @@ export default {
         this.tableData = res.data;
       }
     },
+    /*
+   * 重置
+   * */
+    resetValue(){
+      //清空数据
+      this.searchModel.departmentName="";
+      //重新查询
+      this.search();
+    },
    openAddWindow(){
       //清空表单数据
      this.$resetForm("deptForm", this.dept);
@@ -267,6 +276,7 @@ export default {
     onParentClose() {
       this.parentDialog.visible = false;
     },
+
     /*
    * 选择所属部门的确认事件
    * */
