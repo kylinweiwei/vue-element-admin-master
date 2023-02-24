@@ -4,7 +4,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">通用权限管理系统</h3>
+        <h3 class="title">荷兰豆智能监测系统</h3>
       </div>
 <!--用户名-->
       <el-form-item prop="username">

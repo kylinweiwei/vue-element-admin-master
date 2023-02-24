@@ -21,6 +21,9 @@ import myconfirm from '@/utils/myconfirm'
 import resetForm from '@/utils/resetForm'
 //导入数据表单回显组件脚本
 import objCopy from '@/utils/objCopy'
+//导入按钮权限判断
+import hasPermission from '@/permission/index'
+Vue.prototype.hasPermission = hasPermission;
 
 Vue.prototype.$myconfirm = myconfirm;
 Vue.prototype.$resetForm = resetForm;
